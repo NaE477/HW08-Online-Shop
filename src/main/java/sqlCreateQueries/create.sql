@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS categories
 (
     category_id       SERIAL PRIMARY KEY,
     category_name     VARCHAR(50),
-    super_category_id INTEGER,
+    super_category_id INTEGER DEFAULT NULL,
 
     FOREIGN KEY (super_category_id) REFERENCES categories (category_id)
 );
