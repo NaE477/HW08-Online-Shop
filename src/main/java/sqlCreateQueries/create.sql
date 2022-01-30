@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS customers
     customer_id SERIAL PRIMARY KEY,
     first_name  VARCHAR(50),
     last_name   VARCHAR(50),
-    username    VARCHAR(50),
+    username    VARCHAR(50) UNIQUE,
     password    VARCHAR(50),
     email       VARCHAR(50),
     address     VARCHAR(500),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS managers
     manager_id SERIAL PRIMARY KEY,
     first_name VARCHAR(50),
     last_name  VARCHAR(50),
-    username   VARCHAR(50),
+    username   VARCHAR(50) UNIQUE,
     password   VARCHAR(50),
     email      VARCHAR(50),
     salary     DOUBLE PRECISION
