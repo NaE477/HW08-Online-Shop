@@ -14,4 +14,13 @@ public class Customer extends User{
         this.address = address;
         this.balance = balance;
     }
+
+    @Override
+    public String toString() {
+        return "ID: " + super.getId() +
+                "\nFull Name: " + super.getFirstName() + " " + super.getLastName() +
+                "\nEmail: " + super.getEmailAddress() + " " +
+                "\nAddress: " + getAddress() +
+                "\nBalance: " + getBalance().toString();
+    }
 }

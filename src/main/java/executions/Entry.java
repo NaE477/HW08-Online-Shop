@@ -1,7 +1,5 @@
 package executions;
 
-import repositories.CategoryRepository;
-import things.shopRelated.Category;
 
 import java.sql.Connection;
 

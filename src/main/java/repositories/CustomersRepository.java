@@ -64,14 +64,20 @@ public class CustomersRepository extends Repository<Customer>{
 
     @Override
     public Integer update(Customer customer) {
-        String updateStmt = "UPDATE customers SET password = ?,email = ?,address = ?,balance = ? WHERE username = ? RETURNING customer_id;";
+        String updateStmt = "UPDATE customers" +
+                " SET password = ?," +
+                "email = ?," +
+                "address = ?," +
+                "balance = ? " +
+                "WHERE username = ? " +
+                "RETURNING customer_id;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(updateStmt);
             ps.setString(1,customer.getPassword());
             ps.setString(2,customer.getEmailAddress());
             ps.setString(3,customer.getAddress());
             ps.setDouble(4,customer.getBalance());
-            ps.setInt(5, customer.getId());
+            ps.setString(5, customer.getUsername());
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 return rs.getInt("customer_id");
@@ -117,8 +123,10 @@ public class CustomersRepository extends Repository<Customer>{
     protected Customer mapTo(ResultSet rs) {
         try {
             if(rs.next()){
-                return new Customer(rs.getInt("customer_id"),rs.getString("first_name"),
-                        rs.getString("last_naem"),
+                return new Customer(
+                        rs.getInt("customer_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
                         rs.getString("username"),
                         rs.getString("password"),
                         rs.getString("email"),
