@@ -6,8 +6,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
 
-public class OrderDetailsRepository extends Repository<OrderDetails> {
-    public OrderDetailsRepository(Connection connection) {
+public class OrderToProductRepository extends Repository<OrderDetails> {
+    public OrderToProductRepository(Connection connection) {
         super(connection);
     }
 

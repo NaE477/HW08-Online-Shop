@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import things.shopRelated.Product;
 
-import java.util.List;
+import java.util.HashMap;
 
 @Getter
 @Setter
 public class OrderDetails {
     private Order order;
-    private List<Product> products;
-    private List<Integer> quantities;
+    private HashMap<Product,Integer> products;
 
     public OrderDetails(Order order) {
         this.order = order;
