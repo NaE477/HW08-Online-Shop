@@ -1,8 +1,10 @@
 package executions;
 
 
+import services.CategoryService;
 import services.CustomerService;
 import services.ManagerService;
+import things.shopRelated.Category;
 
 import java.sql.*;
 import java.util.List;
@@ -15,11 +17,13 @@ public class Utilities {
     Scanner scanner = new Scanner(System.in);
     CustomerService customerService;
     ManagerService managerService;
+    CategoryService categoryService;
 
     public Utilities(Connection connection) {
         this.connection = connection;
         customerService = new CustomerService(connection);
         managerService = new ManagerService(connection);
+        categoryService = new CategoryService(connection);
     }
 
     public String usernameReceiver() {
@@ -44,6 +48,17 @@ public class Utilities {
             if (managerService.findByEmail(email) != null || customerService.findByEmail(email) != null) {
                 System.out.println("Email address already exists. Try another one.");
             } else return email;
+        }
+    }
+
+    public String categoryReceiver(){
+        while (true) {
+            String categoryName = regexAdder("[a-zA-Z]","Category","Only Letters");
+            Category category = new Category(categoryName);
+            if(categoryService.find(category) != null){
+                System.out.println("Category already exists in hierarchy.");
+            }
+            else return categoryName;
         }
     }
 

@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CategoryRepository extends Repository<Category> {
     public CategoryRepository(Connection connection) {
@@ -16,25 +17,29 @@ public class CategoryRepository extends Repository<Category> {
 
     @Override
     public Integer insert(Category category) {
+        String insStmt = "INSERT INTO categories (category_name, super_category_id) VALUES (?,?) RETURNING category_id";
         try {
-            if (category.getSuperCategory() == null) {
-                String insStmt = "INSERT INTO categories (category_name) VALUES (?) RETURNING category_id;";
-                PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
-                ps.setString(1,category.getCatName());
-                ResultSet rs = ps.executeQuery();
-                if(rs.next()) {
-                    return rs.getInt("category_id");
-                }
+            PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
+            ps.setString(1, category.getCatName());
+            ps.setInt(2, category.getSuperCategory().getId());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("category_id");
             }
-            else {
-                String insStmt = "INSERT INTO categories (category_name, super_category_id) VALUES (?,?) RETURNING category_id";
-                PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
-                ps.setString(1,category.getCatName());
-                ps.setInt(2,category.getSuperCategory().getId());
-                ResultSet rs = ps.executeQuery();
-                if(rs.next()) {
-                    return rs.getInt("category_id");
-                }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Integer insertSuper(Category category) {
+        String insStmt = "INSERT INTO categories (category_name) VALUES (?) RETURNING category_id;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
+            ps.setString(1, category.getCatName());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("category_id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,12 +59,46 @@ public class CategoryRepository extends Repository<Category> {
         }
         return null;
     }
+    public Category read(Category category){
+        String selectStmt = "SELECT * FROM categories WHERE UPPER(category_name) = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            ps.setString(1,category.getCatName().toUpperCase(Locale.ROOT));
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public List<Category> readAll() {
         String selectStmt = "SELECT * FROM categories;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            return mapToList(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<Category> readAllRootCategories() {
+        String selectStmt = "SELECT * FROM categories WHERE super_category_id IS NULL;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            return mapToList(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<Category> readAllBySuper(Category superCategory) {
+        String selectStmt = "SELECT * FROM categories WHERE super_category_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            ps.setInt(1, superCategory.getSuperCategory().getId());
             return mapToList(ps.executeQuery());
         } catch (SQLException e) {
             e.printStackTrace();

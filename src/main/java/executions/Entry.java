@@ -21,12 +21,13 @@ public class Entry {
     static Utilities utilities = new Utilities(connection);
 
     public static void main(String[] args) {
+        System.out.println("Welcome to the Online Shop.\n" +
+                "Enter L/l to Login or S/s to sign up or E/e to Exit.");
+        System.out.print("Option: ");
         label:
         while (true) {
-            System.out.println("Welcome to the Online Shop.\n" +
-                    "Enter L/l to Login or S/s to sign up or E/e to Exit.");
-            String lOrS = scanner.nextLine().toUpperCase(Locale.ROOT);
-            switch (lOrS) {
+            String option = scanner.nextLine().toUpperCase(Locale.ROOT);
+            switch (option) {
                 case "L":
                     User user = login();
                     if (user != null) {
@@ -37,15 +38,16 @@ public class Entry {
                             CustomerSection customerSection = new CustomerSection((Customer) user);
                             customerSection.entry();
                         }
-                    } else System.out.println("Wrong Username/Password. Try Again.");
+                    } else System.out.print("Wrong Username/Password. Try Again. L/S/E: ");
                     break;
                 case "S":
                     signUp();
+                    System.out.print("Option: ");
                     break;
                 case "E":
                     break label;
                 default:
-                    System.out.println("Enter L/S/E.");
+                    System.out.print("Enter L/S/E: ");
                     break;
             }
         }
