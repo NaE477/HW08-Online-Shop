@@ -1,18 +1,24 @@
 package services;
 
+import repositories.ShoppingCartToProductRepository;
+import repositories.ShoppingCartsRepository;
 import things.userRelated.ShoppingCart;
 
 import java.sql.Connection;
 import java.util.List;
 
 public class ShoppingCartService extends Service<ShoppingCart> {
+    ShoppingCartsRepository scr;
+    ShoppingCartToProductRepository sctpr;
     public ShoppingCartService(Connection connection) {
         super(connection);
+        scr = new ShoppingCartsRepository(super.getConnection());
+        sctpr = new ShoppingCartToProductRepository(super.getConnection());
     }
 
     @Override
-    public ShoppingCart find(Integer id) {
-        return null;
+    public ShoppingCart find(Integer shoppingCartId) {
+        return scr.read(shoppingCartId);
     }
 
     @Override
@@ -22,7 +28,7 @@ public class ShoppingCartService extends Service<ShoppingCart> {
 
     @Override
     public Integer update(ShoppingCart shoppingCart) {
-        return null;
+        return scr.update(shoppingCart);
     }
 
     @Override
