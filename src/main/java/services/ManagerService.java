@@ -17,6 +17,9 @@ public class ManagerService extends Service<Manager>{
     public Manager find(Integer id) {
         return mr.read(id);
     }
+    public Manager findByUsername(String username){
+        return mr.read(username);
+    }
 
     @Override
     public List<Manager> findAll() {

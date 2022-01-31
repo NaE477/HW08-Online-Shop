@@ -49,6 +49,17 @@ public class CustomersRepository extends Repository<Customer>{
         }
         return null;
     }
+    public Customer read(String username){
+        String readStmt = "SELECT * FROM customers WHERE username = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
+            ps.setString(1,username);
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public List<Customer> readAll() {

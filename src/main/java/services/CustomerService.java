@@ -17,6 +17,9 @@ public class CustomerService extends Service<Customer>{
     public Customer find(Integer customerId) {
         return cr.read(customerId);
     }
+    public Customer findByUsername(String username){
+        return cr.read(username);
+    }
 
     @Override
     public List<Customer> findAll() {

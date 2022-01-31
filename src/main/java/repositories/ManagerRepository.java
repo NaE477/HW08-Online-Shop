@@ -1,5 +1,6 @@
 package repositories;
 
+import services.ManagerService;
 import users.Manager;
 
 import java.sql.Connection;
@@ -43,6 +44,18 @@ public class ManagerRepository extends Repository<Manager>{
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
             ps.setInt(1,id);
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Manager read(String username){
+        String readStmt = "SELECT * FROM managers WHERE username = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
+            ps.setString(1,username);
             return mapTo(ps.executeQuery());
         } catch (SQLException e) {
             e.printStackTrace();
