@@ -1,0 +1,35 @@
+package services;
+
+import repositories.ManagerRepository;
+import users.Manager;
+
+import java.sql.Connection;
+import java.util.List;
+
+public class ManagerService extends Service<Manager>{
+    ManagerRepository mr;
+    public ManagerService(Connection connection) {
+        super(connection);
+        mr = new ManagerRepository(super.getConnection());
+    }
+
+    @Override
+    public Manager find(Integer id) {
+        return mr.read(id);
+    }
+
+    @Override
+    public List<Manager> findAll() {
+        return mr.readAll();
+    }
+
+    @Override
+    public Integer update(Manager manager) {
+        return mr.update(manager);
+    }
+
+    @Override
+    public Integer delete(Integer id) {
+        return mr.delete(id);
+    }
+}
