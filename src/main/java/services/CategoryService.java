@@ -26,6 +26,9 @@ public class CategoryService extends Service<Category> {
     public Category find(Category category){
         return cr.read(category);
     }
+    public Category find(String categoryName){
+        return cr.read(categoryName);
+    }
 
     @Override
     public List<Category> findAll() {

@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ProductsRepository extends Repository<Product> {
@@ -17,14 +18,18 @@ public class ProductsRepository extends Repository<Product> {
 
     @Override
     public Integer insert(Product product) {
-        String insStmt = "INSERT INTO products (product_name, description, price, cat_id) " +
-                "VALUES (?,?,?,?) RETURNING product_id;";
+        return null;
+    }
+    public Integer insert(Product product,Integer quantity) {
+        String insStmt = "INSERT INTO products (product_name, description, price, cat_id,quantity) " +
+                "VALUES (?,?,?,?,?) RETURNING product_id;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
             ps.setString(1, product.getProductName());
             ps.setString(2, product.getDescription());
             ps.setDouble(3, product.getPrice());
             ps.setInt(4, product.getCategory().getId());
+            ps.setInt(5,quantity);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("product_id");
@@ -52,10 +57,38 @@ public class ProductsRepository extends Repository<Product> {
 
     @Override
     public List<Product> readAll() {
-        String slcStmt = "SELECT * FROM products";
+        String slcStmt = "SELECT * FROM products" +
+                " INNER JOIN categories c on c.category_id = products.cat_id";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(slcStmt);
             mapToList(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public HashMap<Product,Integer> readAllWithQuantity(){
+        HashMap<Product,Integer> products = new HashMap<>();
+        String slcStmt = "SELECT * FROM products" +
+                " INNER JOIN categories c on c.category_id = products.cat_id;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(slcStmt);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                products.put(
+                        new Product(
+                                rs.getInt("product_id"),
+                                rs.getString("product_name"),
+                                rs.getString("description"),
+                                rs.getDouble("price"),
+                                new Category(
+                                        rs.getInt("cat_id"),
+                                        rs.getString("category_name"))
+                        )
+                        ,rs.getInt("quantity"));
+            }
+            return products;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -71,6 +104,19 @@ public class ProductsRepository extends Repository<Product> {
             ps.setString(2, product.getDescription());
             ps.setString(3, product.getCategory().getCatName());
             ps.setDouble(4, product.getPrice());
+            ps.executeUpdate();
+            return product.getId();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public Integer update(Product product,Integer quantity){
+        String updateStmt = "UPDATE products SET quantity = ? WHERE product_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(updateStmt);
+            ps.setInt(1,quantity);
+            ps.setInt(2,product.getId());
             ps.executeUpdate();
             return product.getId();
         } catch (SQLException e) {

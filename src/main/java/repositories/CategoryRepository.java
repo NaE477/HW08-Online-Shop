@@ -70,6 +70,17 @@ public class CategoryRepository extends Repository<Category> {
         }
         return null;
     }
+    public Category read(String categoryName){
+        String selectStmt = "SELECT * FROM categories WHERE UPPER(category_name) = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            ps.setString(1,categoryName.toUpperCase(Locale.ROOT));
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public List<Category> readAll() {

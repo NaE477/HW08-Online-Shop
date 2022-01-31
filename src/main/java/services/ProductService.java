@@ -4,6 +4,7 @@ import repositories.ProductsRepository;
 import things.shopRelated.Product;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.List;
 
 public class ProductService extends Service<Product>{
@@ -13,6 +14,9 @@ public class ProductService extends Service<Product>{
         pr = new ProductsRepository(super.getConnection());
     }
 
+    public Integer addProductToWareHouse(Product product,Integer quantity){
+        return pr.insert(product,quantity);
+    }
     @Override
     public Product find(Integer productId) {
         return pr.read(productId);
@@ -23,9 +27,16 @@ public class ProductService extends Service<Product>{
         return pr.readAll();
     }
 
+    public HashMap<Product,Integer> findAllWithQuantity(){
+        return pr.readAllWithQuantity();
+    }
+
     @Override
     public Integer update(Product product) {
         return pr.update(product);
+    }
+    public Integer update(Product product,Integer quantity){
+        return pr.update(product,quantity);
     }
 
     @Override
