@@ -13,7 +13,8 @@ public class OrderDetails {
     private Order order;
     private HashMap<Product,Integer> products;
 
-    public OrderDetails(Order order) {
+    public OrderDetails(Order order,HashMap<Product,Integer> products) {
         this.order = order;
+        this.products = products;
     }
 }
