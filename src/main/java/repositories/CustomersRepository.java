@@ -60,6 +60,17 @@ public class CustomersRepository extends Repository<Customer>{
         }
         return null;
     }
+    public Customer readByEmail(String email){
+        String readStmt = "SELECT * FROM customers WHERE email = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
+            ps.setString(1,email);
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public List<Customer> readAll() {

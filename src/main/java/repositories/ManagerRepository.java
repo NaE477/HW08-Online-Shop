@@ -1,6 +1,7 @@
 package repositories;
 
 import services.ManagerService;
+import users.Customer;
 import users.Manager;
 
 import java.sql.Connection;
@@ -56,6 +57,17 @@ public class ManagerRepository extends Repository<Manager>{
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
             ps.setString(1,username);
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public Manager readByEmail(String email){
+        String readStmt = "SELECT * FROM managers WHERE email = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
+            ps.setString(1,email);
             return mapTo(ps.executeQuery());
         } catch (SQLException e) {
             e.printStackTrace();

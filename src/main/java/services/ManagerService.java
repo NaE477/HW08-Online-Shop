@@ -20,6 +20,9 @@ public class ManagerService extends Service<Manager>{
     public Manager findByUsername(String username){
         return mr.read(username);
     }
+    public Manager findByEmail(String email){
+        return mr.readByEmail(email);
+    }
 
     @Override
     public List<Manager> findAll() {

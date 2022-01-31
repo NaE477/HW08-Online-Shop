@@ -13,12 +13,19 @@ public class CustomerService extends Service<Customer>{
         cr = new CustomersRepository(super.getConnection());
     }
 
+
+    public Integer signUp(Customer customer){
+        return cr.insert(customer);
+    }
     @Override
     public Customer find(Integer customerId) {
         return cr.read(customerId);
     }
     public Customer findByUsername(String username){
         return cr.read(username);
+    }
+    public Customer findByEmail(String email){
+        return cr.readByEmail(email);
     }
 
     @Override
