@@ -1,31 +1,29 @@
 package services;
 
+import repositories.OrderToProductRepository;
+import repositories.OrdersRepository;
 import things.userRelated.OrderDetails;
 
 import java.sql.Connection;
 import java.util.List;
 
-public class OrderDetailService extends Service<OrderDetails> {
+public class OrderDetailService {
+    Connection connection;
+    OrderToProductRepository otpr;
+
     public OrderDetailService(Connection connection) {
-        super(connection);
+        this.connection = connection;
+        otpr = new OrderToProductRepository(this.connection);
     }
 
-    @Override
-    public OrderDetails find(Integer id) {
-        return null;
+    public OrderDetails find(Integer orderId) {
+        return otpr.read(orderId);
     }
 
-    @Override
-    public List<OrderDetails> findAll() {
-        return null;
-    }
-
-    @Override
     public Integer update(OrderDetails orderDetails) {
         return null;
     }
 
-    @Override
     public Integer delete(Integer id) {
         return null;
     }
