@@ -1,32 +1,35 @@
 package services;
 
+import repositories.CustomersRepository;
 import users.Customer;
 
 import java.sql.Connection;
 import java.util.List;
 
 public class CustomerService extends Service<Customer>{
+    CustomersRepository cr;
     public CustomerService(Connection connection) {
         super(connection);
+        cr = new CustomersRepository(super.getConnection());
     }
 
     @Override
-    public Customer find(Integer id) {
-        return null;
+    public Customer find(Integer customerId) {
+        return cr.read(customerId);
     }
 
     @Override
     public List<Customer> findAll() {
-        return null;
+        return cr.readAll();
     }
 
     @Override
     public Integer update(Customer customer) {
-        return null;
+        return cr.update(customer);
     }
 
     @Override
-    public Integer delete(Integer id) {
-        return null;
+    public Integer delete(Integer customerId) {
+        return cr.delete(customerId);
     }
 }
