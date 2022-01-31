@@ -1,32 +1,35 @@
 package services;
 
+import repositories.OrdersRepository;
 import things.userRelated.Order;
 
 import java.sql.Connection;
 import java.util.List;
 
 public class OrderService extends Service<Order>{
+    OrdersRepository or;
     public OrderService(Connection connection) {
         super(connection);
+        or = new OrdersRepository(super.getConnection());
     }
 
     @Override
-    public Order find(Integer id) {
-        return null;
+    public Order find(Integer orderId) {
+        return or.read(orderId);
     }
 
     @Override
     public List<Order> findAll() {
-        return null;
+        return or.readAll();
     }
 
     @Override
     public Integer update(Order order) {
-        return null;
+        return or.update(order);
     }
 
     @Override
-    public Integer delete(Integer id) {
-        return null;
+    public Integer delete(Integer orderId) {
+        return or.delete(orderId);
     }
 }
