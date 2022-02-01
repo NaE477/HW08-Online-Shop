@@ -13,6 +13,9 @@ public class ManagerService extends Service<Manager>{
         mr = new ManagerRepository(super.getConnection());
     }
 
+    public Integer signUp(Manager manager){
+        return mr.insert(manager);
+    }
     @Override
     public Manager find(Integer id) {
         return mr.read(id);

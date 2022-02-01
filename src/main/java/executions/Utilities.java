@@ -53,7 +53,7 @@ public class Utilities {
 
     public String categoryReceiver(){
         while (true) {
-            String categoryName = regexAdder("[a-zA-Z]","Category","Only Letters");
+            String categoryName = regexAdder("^[a-zA-Z\\s]+","Category","Only Letters");
             Category category = new Category(categoryName);
             if(categoryService.find(category) != null){
                 System.out.println("Category already exists in hierarchy.");
@@ -227,6 +227,15 @@ public class Utilities {
             String ANSI_GREEN = "\u001B[32m";
             System.out.print("------------------------------\n" + ANSI_GREEN + input + ANSI_RESET + "\n------------------------------\n");
             Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public void printGreen(String input,Integer waitTime){
+        try {
+            String ANSI_GREEN = "\u001B[32m";
+            System.out.print("------------------------------\n" + ANSI_GREEN + input + ANSI_RESET + "\n------------------------------\n");
+            Thread.sleep(waitTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

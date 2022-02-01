@@ -109,7 +109,7 @@ public class CategoryRepository extends Repository<Category> {
         String selectStmt = "SELECT * FROM categories WHERE super_category_id = ?;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
-            ps.setInt(1, superCategory.getSuperCategory().getId());
+            ps.setInt(1, superCategory.getId());
             return mapToList(ps.executeQuery());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -144,18 +144,20 @@ public class CategoryRepository extends Repository<Category> {
     @Override
     protected Category mapTo(ResultSet rs) {
         try {
-            if (rs.getInt(3) == 0) {
-                return new Category(
-                        rs.getInt(1),
-                        rs.getString(2),
-                        null)
-                        ;
-            } else {
-                return new Category(
-                        rs.getInt(1),
-                        rs.getString(2),
-                        read(rs.getInt(3))
-                );
+            if(rs.next()) {
+                if (rs.getInt(3) == 0) {
+                    return new Category(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            null)
+                            ;
+                } else {
+                    return new Category(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            read(rs.getInt(3))
+                    );
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

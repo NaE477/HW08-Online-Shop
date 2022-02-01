@@ -12,4 +12,12 @@ public class Manager extends User{
         super(id,firstname,lastname,username,password,emailAddress);
         this.salary = salary;
     }
+
+    @Override
+    public String toString() {
+        return "ID: " + super.getId() +
+                "\nName: " + super.getFirstName() + " " + super.getLastName() +
+                "\nEmail: " + super.getEmailAddress() +
+                "\nSalary: " + getSalary().intValue();
+    }
 }
