@@ -45,8 +45,29 @@ public class ShoppingCartsRepository extends Repository<ShoppingCart>{
                 " INNER JOIN shopping_carts s on c.customer_id = s.customer_id " +
                 " WHERE sc.cart_id = ?;";
         try {
-            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt,
+                    ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
             ps.setInt(1,id);
+            return mapTo(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public ShoppingCart readByCustomer(Customer customer){
+        String readStmt = "SELECT * FROM cart_to_products " +
+                " INNER JOIN products p on p.product_id = cart_to_products.product_id " +
+                " INNER JOIN shopping_carts sc on sc.cart_id = cart_to_products.cart_id " +
+                " INNER JOIN customers c on c.customer_id = sc.customer_id " +
+                " INNER JOIN categories c2 on c2.category_id = p.cat_id " +
+                " INNER JOIN shopping_carts s on c.customer_id = s.customer_id " +
+                " WHERE c.customer_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt,
+                    ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            ps.setInt( 1,customer.getId());
             return mapTo(ps.executeQuery());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,8 +107,8 @@ public class ShoppingCartsRepository extends Repository<ShoppingCart>{
                                 rs.getString(5),
                                 rs.getString("description"),
                                 rs.getDouble("price"),
-                                new Category(rs.getString("category_name"))
-
+                                new Category(rs.getString("category_name")
+                                )
                         ),
                         rs.getInt(3)
                 );

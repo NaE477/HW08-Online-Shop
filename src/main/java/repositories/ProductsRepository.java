@@ -95,6 +95,36 @@ public class ProductsRepository extends Repository<Product> {
         return null;
     }
 
+
+    public HashMap<Product,Integer> readAllByCategoryID(Integer categoryID){
+        HashMap<Product,Integer> products = new HashMap<>();
+        String selectStmt = "SELECT * FROM products " +
+                "INNER JOIN categories c on c.category_id = products.cat_id " +
+                "WHERE cat_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            ps.setInt(1,categoryID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                products.put(
+                        new Product(
+                                rs.getInt("product_id"),
+                                rs.getString("product_name"),
+                                rs.getString("description"),
+                                rs.getDouble("price"),
+                                new Category(
+                                        rs.getInt("cat_id"),
+                                        rs.getString("category_name"))
+                        )
+                        ,rs.getInt("quantity"));
+            }
+            return products;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public Integer update(Product product) {
         String updateStmt = "UPDATE products SET product_name = ?,description = ?,cat_id = ?,price = ? WHERE cat_id = ?;";

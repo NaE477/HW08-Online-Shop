@@ -26,6 +26,9 @@ public class ProductService extends Service<Product>{
     public List<Product> findAll() {
         return pr.readAll();
     }
+    public HashMap<Product,Integer> findAllByCategoryID(Integer categoryID){
+        return pr.readAllByCategoryID(categoryID);
+    }
 
     public HashMap<Product,Integer> findAllWithQuantity(){
         return pr.readAllWithQuantity();

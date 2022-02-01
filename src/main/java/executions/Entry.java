@@ -10,6 +10,10 @@ import users.Manager;
 import users.User;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -21,11 +25,10 @@ public class Entry {
     static Utilities utilities = new Utilities(connection);
 
     public static void main(String[] args) {
-        System.out.println("Welcome to the Online Shop.\n" +
-                "Enter L/l to Login or S/s to sign up or E/e to Exit.");
-        System.out.print("Option: ");
         label:
-        while (true) {
+        while (true) {System.out.println("Welcome to the Online Shop.\n" +
+                "Enter L/l to Login or S/s to sign up or E/e to Exit.");
+            System.out.print("Option: ");
             String option = scanner.nextLine().toUpperCase(Locale.ROOT);
             switch (option) {
                 case "L":
@@ -35,7 +38,7 @@ public class Entry {
                             ManagerSection managerSection = new ManagerSection((Manager) user);
                             managerSection.entry();
                         } else if (user instanceof Customer) {
-                            CustomerSection customerSection = new CustomerSection((Customer) user);
+                            CustomerSection customerSection = new CustomerSection((Customer) user, connection);
                             customerSection.entry();
                         }
                     } else System.out.print("Wrong Username/Password. Try Again. L/S/E: ");

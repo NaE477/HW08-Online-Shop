@@ -117,6 +117,32 @@ public class CategoryRepository extends Repository<Category> {
         return null;
     }
 
+    public List<Integer> readAllDescendents(Category superCategory){
+        ArrayList<Integer> nodesIDs = new ArrayList<>();
+        String selectStmt = "WITH RECURSIVE category_path (id,title, path) AS " +
+                "(" +
+                "SELECT category_id,category_name,category_name::varchar as path " +
+                "FROM categories WHERE super_category_id = ?" +
+                "UNION ALL " +
+                "SELECT c.category_id,c.category_name, CONCAT(cp.path, ' > ', c.category_name)" +
+                " FROM category_path AS cp JOIN categories AS c " +
+                "ON cp.id = c.super_category_id" +
+                ")" +
+                "SELECT * FROM category_path " +
+                " ORDER BY path;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
+            ps.setInt(1,1);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                nodesIDs.add(rs.getInt(1));
+            }
+            return nodesIDs;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }return null;
+    }
+
     @Override
     public Integer update(Category category) {
         String updStmt = "UPDATE categories SET category_name = ? WHERE category_id = ?;";

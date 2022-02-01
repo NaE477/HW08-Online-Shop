@@ -40,6 +40,9 @@ public class CategoryService extends Service<Category> {
     public List<Category> findAllBySuper(Category superCategory){
         return cr.readAllBySuper(superCategory);
     }
+    public List<Integer> findAllDescendants(Category superCategory){
+        return cr.readAllDescendents(superCategory);
+    }
 
     @Override
     public Integer update(Category category) {

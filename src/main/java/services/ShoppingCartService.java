@@ -3,6 +3,7 @@ package services;
 import repositories.ShoppingCartToProductRepository;
 import repositories.ShoppingCartsRepository;
 import things.userRelated.ShoppingCart;
+import users.Customer;
 
 import java.sql.Connection;
 import java.util.List;
@@ -20,6 +21,7 @@ public class ShoppingCartService extends Service<ShoppingCart> {
     public ShoppingCart find(Integer shoppingCartId) {
         return scr.read(shoppingCartId);
     }
+    public ShoppingCart findByCustomer(Customer customer){ return scr.readByCustomer(customer);}
 
     @Override
     public List<ShoppingCart> findAll() {
