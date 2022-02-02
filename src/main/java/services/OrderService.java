@@ -2,6 +2,7 @@ package services;
 
 import repositories.OrdersRepository;
 import things.userRelated.Order;
+import users.Customer;
 
 import java.sql.Connection;
 import java.util.List;
@@ -24,6 +25,12 @@ public class OrderService extends Service<Order>{
     @Override
     public List<Order> findAll() {
         return or.readAll();
+    }
+    public List<Order> findAllForCustomer(Customer customer){
+        return or.readAllByCustomer(customer);
+    }
+    public List<Order> findAllPendingsForCustomer(Customer customer){
+        return or.readAllPendingsByCustomer(customer);
     }
 
     @Override

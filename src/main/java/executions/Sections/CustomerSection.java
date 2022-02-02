@@ -26,6 +26,7 @@ public class CustomerSection {
     private final CategoryService categoryService = new CategoryService(connection);
     private final ProductService productService = new ProductService(connection);
     private final OrderService orderService = new OrderService(connection);
+    private final OrderDetailService orderDetailService = new OrderDetailService(connection);
     private final Utilities utilities = new Utilities(connection);
     private final Scanner scanner = new Scanner(System.in);
 
@@ -41,9 +42,7 @@ public class CustomerSection {
             System.out.println("""
                     1-Buy Product
                     2-Shopping Cart Management
-                    3-
-                    4-View Orders
-                    -View Profile
+                    3-View Profile
                     0-Exit""");
             String option = scanner.nextLine();
             if (option.equals("1")) {
@@ -55,7 +54,7 @@ public class CustomerSection {
             } else if (option.equals("2")) {
                 shoppingCartManagement();
             } else if (option.equals("3")) {
-
+                utilities.printGreen(customer.toString());
             } else if (option.equals("0")) {
                 break;
             } else {
@@ -158,83 +157,139 @@ public class CustomerSection {
                             shoppingCartToProductService.changeQuantity(shoppingCart, product, newQuantity);
                             productService.changeQuantity(product, productWarehouseQuantity - quantity);
                             utilities.printGreen("New amount added to product in your shopping cart.");
-                        }
-
-                        else {
+                        } else {
                             productsInShoppingCart.put(product, quantity);
                             shoppingCart.setProducts(productsInShoppingCart);
                             shoppingCartToProductService.addProductToCart(shoppingCart, product, quantity);
                             productService.changeQuantity(product, productWarehouseQuantity - quantity);
                             utilities.printGreen("Product added to your shopping cart.");
                         }
-                    }
-                    else utilities.printRed("0 quantity not permitted.");
+                    } else utilities.printRed("0 quantity not permitted.");
                     break;
-                }
-                else utilities.printRed("Quantity more than stock.");
+                } else utilities.printRed("Quantity more than stock.");
             } else utilities.printRed("Wrong ID.");
         }
     }
 
     private void shoppingCartManagement() {
-        while (true){
+        label:
+        while (true) {
             System.out.println("""
                     1-View Shopping Cart
                     2-Remove From Shopping Cart
                     3-Check Out
-                    4-Finalize Order
+                    4-View Orders
+                    5-Finalize Order
                     0-Exit""");
             String option = scanner.nextLine();
-            if(option.equals("1")){
-                utilities.printGreen(shoppingCart.toString());
-                utilities.printGreen("Total Price: " + cartTotalPrice().toString());
-            }
-            else if (option.equals("2")) {
-                System.out.print("Choose Product ID you want to remove: ");
-                Integer productID = utilities.intReceiver();
-                Product productToRemove = productService.find(productID);
-                if(productToRemove != null && shoppingCart.getProducts().containsKey(productToRemove)){
-                    Integer shoppingCartQuantity = shoppingCart.getProducts().get(productToRemove);
-                    Integer warehouseQuantity = productService.findWithQuantity(productToRemove).get(productToRemove);
-                    shoppingCartToProductService.deleteFromCart(shoppingCart,productToRemove);
-                    Integer changeQtyOutput = productService.changeQuantity(productToRemove,warehouseQuantity + shoppingCartQuantity);
-                    if(changeQtyOutput != null) {
-                        utilities.printGreen("Item Successfully deleted from your shopping cart.");
-                    } else utilities.printRed("Something went wrong.");
-                } else utilities.printRed("Wrong Product ID!");
-            }
-            else if(option.equals("3")){
-                utilities.printGreen("Total Price: " + cartTotalPrice().toString());
-                System.out.println("Y/y to finalize - N/n to go back to shopping: ");
-                String yn = scanner.nextLine();
-                if(yn.toUpperCase(Locale.ROOT).equals("Y")){
-                    if(customer.getBalance() >= cartTotalPrice()){
-                        Order order = new Order(0,null,customer, OrderStatus.PENDING);
-                        Integer newOrderID = orderService.registerOrder(order);
-                        order = orderService.find(newOrderID);
-                        OrderDetails orderDetails = new OrderDetails(order,shoppingCart.getProducts());
-                        Map<Product,Integer> orderProducts = shoppingCart.getProducts();
-                        shoppingCart.setProducts(new HashMap<>());
-                        utilities.printGreen("New Order created with ID: " + newOrderID);
-                    } else utilities.printRed("Your Account balance is low. Deposit to your account or remove product to check out.");
-                } else if (yn.toUpperCase(Locale.ROOT).equals("N")) {
+            switch (option) {
+                case "1":
+                    utilities.printGreen(shoppingCart.toString());
+                    utilities.printGreen("Total Price: " + cartTotalPrice().toString());
                     break;
-                } else System.out.println("Wrong option.");
+                case "2":
+                    removeFromCart();
+                    break;
+                case "3":
+                    checkOutCart();
+                    break;
+                case "4":
+                    List<Order> customersOrders = orderService.findAllForCustomer(customer);
+                    utilities.iterateThrough(customersOrders);
+                    break;
+                case "5":
+                    finalizeOrder();
+                    break;
+                case "0":
+                    break label;
+                default:
+                    utilities.printRed("Wrong Option");
+                    break;
             }
-            else if (option.equals("4")){
-
-            }
-            else if (option.equals("0")) {
-                break;
-            } else utilities.printRed("Wrong Option");
         }
-
     }
 
-    private Double cartTotalPrice(){
+    private void removeFromCart(){
+        System.out.print("Choose Product ID you want to remove: ");
+        Integer productID = utilities.intReceiver();
+        Product productToRemove = productService.find(productID);
+        if (productToRemove != null && shoppingCart.getProducts().containsKey(productToRemove)) {
+            Integer shoppingCartQuantity = shoppingCart.getProducts().get(productToRemove);
+            Integer warehouseQuantity = productService.findWithQuantity(productToRemove).get(productToRemove);
+            shoppingCartToProductService.deleteFromCart(shoppingCart, productToRemove);
+            Integer changeQtyOutput = productService.changeQuantity(productToRemove, warehouseQuantity + shoppingCartQuantity);
+            if (changeQtyOutput != null) {
+                HashMap<Product, Integer> cartNewProducts = shoppingCartToProductService.findCartProducts(shoppingCart);
+                shoppingCart.setProducts(cartNewProducts);
+                utilities.printGreen("Item Successfully deleted from your shopping cart.");
+            } else utilities.printRed("Something went wrong.");
+        } else utilities.printRed("Wrong Product ID!");
+    }
+
+    private void checkOutCart(){
+        if (shoppingCart.getProducts().size() > 0) {
+            utilities.printGreen("Your Shopping Cart Contains:");
+            utilities.printGreen(Utilities.iterateThroughProducts(shoppingCart.getProducts()));
+            utilities.printGreen("Total Price: " + cartTotalPrice().toString());
+            while (true) {
+                System.out.println("Y/y to check out - N/n to go back to shopping: ");
+                String yn = scanner.nextLine();
+                if (yn.toUpperCase(Locale.ROOT).equals("Y")) {
+                    Order order = new Order(0, null, customer, OrderStatus.PENDING);
+                    Integer newOrderID = orderService.registerOrder(order);
+                    order = orderService.find(newOrderID);
+                    OrderDetails orderDetails = new OrderDetails(order, shoppingCart.getProducts());
+                    Integer newDetails = orderDetailService.newDetails(orderDetails);
+                    orderDetails.getProducts().forEach((product, quantity) -> shoppingCartToProductService.deleteFromCart(shoppingCart, product));
+                    shoppingCart.setProducts(new HashMap<>());
+                    utilities.printGreen("New Order created with ID: " + newOrderID);
+                    break;
+                } else if (yn.toUpperCase(Locale.ROOT).equals("N")) {
+                    break;
+                } else utilities.printRed("Wrong option.");
+            }
+        } else utilities.printRed("No Item has been added to your cart yet.");
+    }
+
+    private void finalizeOrder(){
+        List<Order> customersPendingOrders = orderService.findAllPendingsForCustomer(customer);
+        utilities.iterateThrough(customersPendingOrders);
+        while (true) {
+            if (customersPendingOrders.size() > 0) {
+                System.out.print("Enter Order ID you want to finalize: ");
+                Integer orderToFinalizeID = utilities.intReceiver();
+                Order orderToFinalize = orderService.find(orderToFinalizeID);
+                if (orderToFinalize != null && customersPendingOrders.contains(orderToFinalize)) {
+                    OrderDetails orderDetailsToFinalize = orderDetailService.find(orderToFinalizeID);
+                    Double ordersTotalPrice = orderTotalPrice(orderDetailsToFinalize);
+                    if (customer.getBalance() >= cartTotalPrice()) {
+                        System.out.println("Y/y to check out - N/n to go back to shopping: ");
+                        String yn = scanner.nextLine();
+                        if (yn.toUpperCase(Locale.ROOT).equals("Y")) {
+                            orderToFinalize.setStatus(OrderStatus.DONE);
+                            orderService.update(orderToFinalize);
+                        } else if (yn.toUpperCase(Locale.ROOT).equals("N")) {
+                            break;
+                        }
+                    }else {
+                        utilities.printRed("Your Account balance is low. Deposit to your account or remove product to check out.");
+                    }
+                } utilities.printRed("Wrong input.");
+            } else break;
+        }
+    }
+
+
+    private Double cartTotalPrice() {
         AtomicReference<Double> totalCartPrice = new AtomicReference<>(0.0);
         shoppingCart.getProducts().forEach(((product, quantity) ->
                 totalCartPrice.updateAndGet(v -> v + product.getPrice() * quantity)));
         return totalCartPrice.get();
+    }
+    private Double orderTotalPrice(OrderDetails orderDetails) {
+        AtomicReference<Double> totalOrderPrice = new AtomicReference<>(0.0);
+        orderDetails.getProducts().forEach(((product, quantity) ->
+                totalOrderPrice.updateAndGet(v -> v + product.getPrice() * quantity)));
+        return totalOrderPrice.get();
     }
 }

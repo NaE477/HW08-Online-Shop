@@ -22,7 +22,7 @@ public class OrdersRepository extends Repository<Order> {
                 "VALUES (CURRENT_DATE,'PENDING',?) RETURNING order_id;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
-            ps.setString(1,order.getStatus().toString());
+            ps.setInt(1,order.getCustomer().getId());
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 return rs.getInt("order_id");
@@ -57,6 +57,28 @@ public class OrdersRepository extends Repository<Order> {
         } catch (SQLException e) {
             e.printStackTrace();
         } return null;
+    }
+    public List<Order> readAllByCustomer(Customer customer){
+        String slcAllStmt = "SELECT * FROM orders WHERE customer_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(slcAllStmt);
+            ps.setInt(1,customer.getId());
+            return mapToList(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public List<Order> readAllPendingsByCustomer(Customer customer){
+        String slcAllStmt = "SELECT * FROM orders WHERE customer_id = ? AND order_status = 'PENDING';";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(slcAllStmt);
+            ps.setInt(1,customer.getId());
+            return mapToList(ps.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
@@ -102,20 +124,22 @@ public class OrdersRepository extends Repository<Order> {
     @Override
     protected Order mapTo(ResultSet rs) {
         try {
-            return new Order(
-                    rs.getInt("order_id"),
-                    rs.getDate("order_date"),
-                    new Customer(
-                            rs.getInt(4),
-                            rs.getString("first_name"),
-                            rs.getString("last_name"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("email"),
-                            rs.getString("address"),
-                            rs.getDouble("balance")),
-                    OrderStatus.valueOf(rs.getString("order_status"))
-            );
+            if(rs.next()) {
+                return new Order(
+                        rs.getInt("order_id"),
+                        rs.getDate("order_date"),
+                        new Customer(
+                                rs.getInt(4),
+                                rs.getString("first_name"),
+                                rs.getString("last_name"),
+                                rs.getString("username"),
+                                rs.getString("password"),
+                                rs.getString("email"),
+                                rs.getString("address"),
+                                rs.getDouble("balance")),
+                        OrderStatus.valueOf(rs.getString("order_status"))
+                );
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -16,6 +16,10 @@ public class OrderDetailService {
         otpr = new OrderToProductRepository(this.connection);
     }
 
+    public Integer newDetails(OrderDetails orderDetails){
+        return otpr.insert(orderDetails);
+    }
+
     public OrderDetails find(Integer orderId) {
         return otpr.read(orderId);
     }

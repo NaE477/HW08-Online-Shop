@@ -15,4 +15,11 @@ public class Order {
     private Date orderDate;
     private Customer customer;
     private OrderStatus status;
+
+    @Override
+    public String toString() {
+        return "ID: " + id +
+                " , Date: " + orderDate +
+                " , Status: " + status;
+    }
 }
