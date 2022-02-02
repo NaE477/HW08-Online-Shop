@@ -12,6 +12,9 @@ public class OrderService extends Service<Order>{
         super(connection);
         or = new OrdersRepository(super.getConnection());
     }
+    public Integer registerOrder(Order order){
+        return or.insert(order);
+    }
 
     @Override
     public Order find(Integer orderId) {

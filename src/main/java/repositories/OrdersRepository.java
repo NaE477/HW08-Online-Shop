@@ -19,12 +19,10 @@ public class OrdersRepository extends Repository<Order> {
     @Override
     public Integer insert(Order order) {
         String insStmt = "INSERT INTO orders (order_date, order_status, customer_id) " +
-                "VALUES (?,?,?) RETURNING order_id;";
+                "VALUES (CURRENT_DATE,'PENDING',?) RETURNING order_id;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(insStmt);
-            ps.setDate(1,order.getOrderDate());
-            ps.setString(2,order.getStatus().toString());
-            ps.setInt(3,order.getCustomer().getId());
+            ps.setString(1,order.getStatus().toString());
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 return rs.getInt("order_id");

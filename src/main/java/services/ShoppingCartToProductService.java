@@ -5,6 +5,7 @@ import things.shopRelated.Product;
 import things.userRelated.ShoppingCart;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ShoppingCartToProductService {
@@ -20,7 +21,7 @@ public class ShoppingCartToProductService {
         sctpr.insert(shoppingCart,product,quantity);
     }
 
-    public Map<Product,Integer> findCartProducts(ShoppingCart cart){
+    public HashMap<Product,Integer> findCartProducts(ShoppingCart cart){
         return sctpr.readAllByCart(cart);
     }
 

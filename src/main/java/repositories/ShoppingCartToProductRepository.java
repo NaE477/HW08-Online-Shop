@@ -32,8 +32,8 @@ public class ShoppingCartToProductRepository {
         }
     }
 
-    public Map<Product,Integer> readAllByCart(ShoppingCart cart) {
-        Map<Product,Integer> products = new HashMap<>();
+    public HashMap<Product,Integer> readAllByCart(ShoppingCart cart) {
+        HashMap<Product,Integer> products = new HashMap<>();
         String slcStmt = "SELECT * FROM cart_to_products" +
                 " INNER JOIN products p on p.product_id = cart_to_products.product_id " +
                 " INNER JOIN categories c on c.category_id = p.cat_id" +
