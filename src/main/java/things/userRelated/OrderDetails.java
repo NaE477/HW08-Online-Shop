@@ -1,5 +1,6 @@
 package things.userRelated;
 
+import executions.Utilities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +17,11 @@ public class OrderDetails {
     public OrderDetails(Order order,HashMap<Product,Integer> products) {
         this.order = order;
         this.products = products;
+    }
+
+    @Override
+    public String toString() {
+        return "Order ID: " + order.getId() +
+                "\n Products: " + Utilities.iterateThroughProducts(products);
     }
 }

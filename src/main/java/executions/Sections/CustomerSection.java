@@ -12,7 +12,6 @@ import things.userRelated.ShoppingCart;
 import users.Customer;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,7 +20,6 @@ public class CustomerSection {
     ShoppingCart shoppingCart;
     private final Connection connection = ConClass.getInstance().getConnection();
     private final ShoppingCartToProductService shoppingCartToProductService = new ShoppingCartToProductService(connection);
-    private final ShoppingCartService shoppingCartService = new ShoppingCartService(connection);
     private final CustomerService customerService = new CustomerService(connection);
     private final CategoryService categoryService = new CategoryService(connection);
     private final ProductService productService = new ProductService(connection);
@@ -32,37 +30,56 @@ public class CustomerSection {
 
     public CustomerSection(Customer customer) {
         this.customer = customer;
+        ShoppingCartService shoppingCartService = new ShoppingCartService(connection);
         shoppingCart = shoppingCartService.findByCustomer(customer);
         shoppingCart.setProducts(shoppingCartToProductService.findCartProducts(shoppingCart));
     }
 
     public void entry() {
         System.out.println("Welcome to Customer Section , " + customer.getFirstName() + " " + customer.getLastName());
+        label:
         while (true) {
             System.out.println("""
                     1-Buy Product
                     2-Shopping Cart Management
-                    3-View Profile
+                    3-Deposit Balance
+                    4-View Profile
+                    5-Change Address
+                    6-Change Password
                     0-Exit""");
             String option = scanner.nextLine();
-            if (option.equals("1")) {
-                Category category = viewCategories();
-                if (category != null) {
-                    buyProduct(category);
-                } else utilities.printRed("No product been added yet. Apologies.");
-
-            } else if (option.equals("2")) {
-                shoppingCartManagement();
-            } else if (option.equals("3")) {
-                utilities.printGreen(customer.toString());
-            } else if (option.equals("0")) {
-                break;
-            } else {
-                utilities.printRed("Wrong Option.");
+            switch (option) {
+                case "1":
+                    Category category = viewCategories();
+                    if (category != null) {
+                        buyProduct(category);
+                    } else utilities.printRed("No product been added yet. Apologies.");
+                    break;
+                case "2":
+                    shoppingCartManagement();
+                    break;
+                case "3":
+                    deposit();
+                    break;
+                case "4":
+                    utilities.printGreen(customer.toString());
+                    break;
+                case "5":
+                    changeAddress();
+                    break;
+                case "6":
+                    changePassword();
+                    break;
+                case "0":
+                    break label;
+                default:
+                    utilities.printRed("Wrong Option.");
+                    break;
             }
         }
     }
 
+    //OPTION #1 - Buying Section
     private Category viewCategories() {
         List<Category> rootCategories = categoryService.findAllRootCategories();
         utilities.iterateThrough(rootCategories);
@@ -127,7 +144,6 @@ public class CustomerSection {
             return null;
         }
     }
-
     private void buyProduct(Category category) {
         List<Integer> descendantCategoriesIDs = categoryService.findAllDescendants(category);
         HashMap<Product, Integer> products = new HashMap<>();
@@ -140,10 +156,10 @@ public class CustomerSection {
             System.out.print("Product ID you want to add to your shopping cart: ");
             Integer productID = utilities.intReceiver();
             Product product = productService.find(productID);
-            HashMap<Product, Integer> productWithQuantityInWareHouse = productService.findWithQuantity(product);
-            Integer productWarehouseQuantity = productWithQuantityInWareHouse.get(product);
-            HashMap<Product, Integer> productsInShoppingCart = shoppingCart.getProducts();
             if (product != null && products.containsKey(product)) {
+                HashMap<Product, Integer> productWithQuantityInWareHouse = productService.findWithQuantity(product);
+                Integer productWarehouseQuantity = productWithQuantityInWareHouse.get(product);
+                HashMap<Product, Integer> productsInShoppingCart = shoppingCart.getProducts();
                 System.out.print("Quantity(In Stock: " + productWarehouseQuantity + "): ");
                 Integer quantity = utilities.intReceiver();
                 if (productWarehouseQuantity >= quantity) {
@@ -171,6 +187,7 @@ public class CustomerSection {
         }
     }
 
+    //OPTION #2 - Shopping Cart Management
     private void shoppingCartManagement() {
         label:
         while (true) {
@@ -180,6 +197,7 @@ public class CustomerSection {
                     3-Check Out
                     4-View Orders
                     5-Finalize Order
+                    6-Check Order Details
                     0-Exit""");
             String option = scanner.nextLine();
             switch (option) {
@@ -200,6 +218,8 @@ public class CustomerSection {
                 case "5":
                     finalizeOrder();
                     break;
+                case "6":
+                    checkOrderDetails();
                 case "0":
                     break label;
                 default:
@@ -209,6 +229,7 @@ public class CustomerSection {
         }
     }
 
+    //OPTION #2.2 - Remove Item from Cart
     private void removeFromCart(){
         System.out.print("Choose Product ID you want to remove: ");
         Integer productID = utilities.intReceiver();
@@ -226,6 +247,7 @@ public class CustomerSection {
         } else utilities.printRed("Wrong Product ID!");
     }
 
+    //OPTION #2.3 - Empty/Checkout Cart
     private void checkOutCart(){
         if (shoppingCart.getProducts().size() > 0) {
             utilities.printGreen("Your Shopping Cart Contains:");
@@ -239,7 +261,7 @@ public class CustomerSection {
                     Integer newOrderID = orderService.registerOrder(order);
                     order = orderService.find(newOrderID);
                     OrderDetails orderDetails = new OrderDetails(order, shoppingCart.getProducts());
-                    Integer newDetails = orderDetailService.newDetails(orderDetails);
+                    orderDetailService.newDetails(orderDetails);
                     orderDetails.getProducts().forEach((product, quantity) -> shoppingCartToProductService.deleteFromCart(shoppingCart, product));
                     shoppingCart.setProducts(new HashMap<>());
                     utilities.printGreen("New Order created with ID: " + newOrderID);
@@ -251,9 +273,11 @@ public class CustomerSection {
         } else utilities.printRed("No Item has been added to your cart yet.");
     }
 
+    //OPTION #2.5 - Finalize Order -> checks balance and compares to receipt.
     private void finalizeOrder(){
         List<Order> customersPendingOrders = orderService.findAllPendingsForCustomer(customer);
         utilities.iterateThrough(customersPendingOrders);
+        label:
         while (true) {
             if (customersPendingOrders.size() > 0) {
                 System.out.print("Enter Order ID you want to finalize: ");
@@ -262,23 +286,82 @@ public class CustomerSection {
                 if (orderToFinalize != null && customersPendingOrders.contains(orderToFinalize)) {
                     OrderDetails orderDetailsToFinalize = orderDetailService.find(orderToFinalizeID);
                     Double ordersTotalPrice = orderTotalPrice(orderDetailsToFinalize);
-                    if (customer.getBalance() >= cartTotalPrice()) {
-                        System.out.println("Y/y to check out - N/n to go back to shopping: ");
-                        String yn = scanner.nextLine();
-                        if (yn.toUpperCase(Locale.ROOT).equals("Y")) {
-                            orderToFinalize.setStatus(OrderStatus.DONE);
-                            orderService.update(orderToFinalize);
-                        } else if (yn.toUpperCase(Locale.ROOT).equals("N")) {
-                            break;
+                    if (customer.getBalance() >= ordersTotalPrice) {
+                        while (true) {
+                            System.out.println("Y/y to check out - N/n to go back to shopping: ");
+                            String yn = scanner.nextLine();
+                            if (yn.toUpperCase(Locale.ROOT).equals("Y")) {
+                                orderToFinalize.setStatus(OrderStatus.DONE);
+                                orderService.update(orderToFinalize);
+                                utilities.printGreen("Order is done.تا سه روز کاری آینده به دستتون میرسه.");
+                                break label;
+                            } else if (yn.toUpperCase(Locale.ROOT).equals("N")) {
+                                break label;
+                            } else utilities.printRed("Wrong Input");
                         }
-                    }else {
+                    }
+                    else {
                         utilities.printRed("Your Account balance is low. Deposit to your account or remove product to check out.");
                     }
-                } utilities.printRed("Wrong input.");
+                } else utilities.printRed("Wrong input.");
             } else break;
         }
     }
 
+    //OPTION #2.6 - Check Order Details
+    private void checkOrderDetails(){
+        List<Order> orders = orderService.findAllForCustomer(customer);
+        utilities.iterateThrough(orders);
+        if(orders.size() > 0){
+            while (true) {
+                System.out.print("Order ID: ");
+                Integer orderID = utilities.intReceiver();
+                Order order = orderService.find(orderID);
+                if (order != null && orders.contains(order)) {
+                    OrderDetails orderDetails = orderDetailService.find(orderID);
+                    utilities.printGreen(orderDetails.toString());
+                    break;
+                } else utilities.printRed("Wrong Order ID.");
+            }
+        }
+    }
+
+    //OPTION #3 - Deposit to Balance
+    private void deposit(){
+        System.out.println("Enter Amount you want to deposit: ");
+        Double depositAmount = utilities.doubleReceiver();
+        customer.setBalance(customer.getBalance() + depositAmount);
+        customerService.update(customer);
+        utilities.printGreen(depositAmount + "  deposited to your account. New balance: " + customer.getBalance());
+    }
+
+    //OPTION #5 - Change Address
+    private void changeAddress(){
+        System.out.println("Enter C/c to change or anything else to get Back if you don't wanna change address anymore: ");
+        String cOrB = scanner.nextLine();
+        if(cOrB.toUpperCase(Locale.ROOT).equals("C")){
+            System.out.println("New Address: ");
+            String newAddress = scanner.nextLine();
+            customer.setAddress(newAddress);
+            customerService.update(customer);
+        }
+    }
+
+    //Option #6 - Change Password
+    private void changePassword(){
+        System.out.println("Enter C/c to change or anything else to get Back if you don't wanna change password anymore: ");
+        String cOrB = scanner.nextLine();
+        if(cOrB.toUpperCase(Locale.ROOT).equals("C")){
+            System.out.println("Old Password: ");
+            String oldPass = scanner.nextLine();
+            System.out.println("New Password: ");
+            String newPass = scanner.nextLine();
+            if(customer.getPassword().equals(oldPass)){
+                customer.setPassword(newPass);
+                customerService.update(customer);
+            } else utilities.printRed("Old Password didn't match.");
+        }
+    }
 
     private Double cartTotalPrice() {
         AtomicReference<Double> totalCartPrice = new AtomicReference<>(0.0);

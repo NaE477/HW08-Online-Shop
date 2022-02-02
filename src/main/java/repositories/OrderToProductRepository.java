@@ -39,14 +39,17 @@ public class OrderToProductRepository {
     }
 
     public OrderDetails read(Integer orderId) {
-        String selectStmt = "SELECT order_to_product.*,o.*,c.*,p.*,c2.category_id FROM order_to_product " +
+        String selectStmt = "SELECT order_to_product.*,o.*,c.*,p.*,c2.* FROM order_to_product " +
                 " INNER JOIN orders o on o.order_id = order_to_product.order_id " +
                 " INNER JOIN customers c on c.customer_id = o.customer_id " +
                 " INNER JOIN products p on p.product_id = order_to_product.product_id " +
                 " INNER JOIN categories c2 on c2.category_id = p.cat_id " +
                 " WHERE order_to_product.order_id = ?;";
         try {
-            PreparedStatement ps = connection.prepareStatement(selectStmt);
+            PreparedStatement ps = connection.prepareStatement(
+                    selectStmt,
+                    ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
             ps.setInt(1,orderId);
             return mapTo(ps.executeQuery());
         } catch (SQLException e) {

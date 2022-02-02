@@ -59,7 +59,9 @@ public class OrdersRepository extends Repository<Order> {
         } return null;
     }
     public List<Order> readAllByCustomer(Customer customer){
-        String slcAllStmt = "SELECT * FROM orders WHERE customer_id = ?;";
+        String slcAllStmt = "SELECT * FROM orders " +
+                "INNER JOIN customers c on c.customer_id = orders.customer_id " +
+                "WHERE orders.customer_id = ?;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(slcAllStmt);
             ps.setInt(1,customer.getId());
@@ -70,7 +72,9 @@ public class OrdersRepository extends Repository<Order> {
         return null;
     }
     public List<Order> readAllPendingsByCustomer(Customer customer){
-        String slcAllStmt = "SELECT * FROM orders WHERE customer_id = ? AND order_status = 'PENDING';";
+        String slcAllStmt = "SELECT * FROM orders" +
+                " INNER JOIN customers c on c.customer_id = orders.customer_id " +
+                " WHERE orders.customer_id = ? AND order_status = 'PENDING';";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(slcAllStmt);
             ps.setInt(1,customer.getId());
