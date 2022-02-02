@@ -135,7 +135,7 @@ public class Utilities {
     public static String iterateThroughProducts(Map<Product,Integer> products){
         StringBuilder output = new StringBuilder();
         if(products.size() > 0) {
-            products.forEach((product,quantity) -> output.append(product).append("\n Quantity: ").append(quantity));
+            products.forEach((product,quantity) -> output.append("\n").append(product).append("\n Quantity: ").append(quantity));
             return output.toString();
         } else return ("No products been added yet.");
     }
