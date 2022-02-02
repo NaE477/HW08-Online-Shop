@@ -73,11 +73,11 @@ public class ManagerSection {
         }
     }
 
+    //OPTION #1
     public void addCategory() {
         try {
             List<Category> firstLayerCategories = categoryService.findAllRootCategories();
             utilities.iterateThrough(firstLayerCategories);
-            while (true) {
                 if (firstLayerCategories.size() > 0) {
                     System.out.println("""
                             1-Add to these categories
@@ -88,7 +88,6 @@ public class ManagerSection {
                         Category newFirstLayerCategory = new Category(0, newFirstLayerCategoryName, null);
                         Integer newFirstLayerCategoryID = categoryService.addSuperCategory(newFirstLayerCategory);
                         utilities.printGreen("New Category created with ID " + newFirstLayerCategoryID);
-                        break;
                     } else if (opt.equals("2")) {
                         System.out.print("Category ID: ");
                         Integer firstLayerCategoryID = utilities.intReceiver();
@@ -106,7 +105,6 @@ public class ManagerSection {
                                     Category newSecondLayerCategory = new Category(0, newSecondLayerCategoryName, firstLayerCategory);
                                     Integer newSecondLayerCategoryID = categoryService.addCommonCategory(newSecondLayerCategory);
                                     utilities.printGreen("New Category Created with ID: " + newSecondLayerCategoryID);
-                                    break;
                                 } else if (secondOpt.equals("2")) {
                                     System.out.print("Category ID: ");
                                     Integer secondLayerCategoryID = utilities.intReceiver();
@@ -118,11 +116,9 @@ public class ManagerSection {
                                         Category newThirdLayerCategory = new Category(0, newThirdLayerCategoryName, secondLayerCategory);
                                         Integer newThirdLayerCategoryID = categoryService.addCommonCategory(newThirdLayerCategory);
                                         utilities.printGreen("New Category created with ID " + newThirdLayerCategoryID);
-                                        break;
                                     } else throw new WrongCategoryEntry();
                                 } else {
                                     utilities.printRed("Wrong Option,Bye.");
-                                    break;
                                 }
                             } else {
                                 String newSecondLayerCategoryName = utilities.categoryReceiver();
@@ -130,27 +126,24 @@ public class ManagerSection {
                                 Integer newSecondLayerCategoryID = categoryService.addCommonCategory(newSecondLayerCategory);
                                 newSecondLayerCategory.setId(newSecondLayerCategoryID);
                                 utilities.printGreen("New Category created with ID " + newSecondLayerCategoryID);
-                                break;
                             }
                         } else throw new WrongCategoryEntry();
                     }
                     else {
                         utilities.printRed("Wrong Option,Bye.");
-                        break;
                     }
                 } else {
                     String newFirstLayerCategoryName = utilities.categoryReceiver();
                     Category newFirstLayerCategory = new Category(0, newFirstLayerCategoryName, null);
                     Integer newFirstLayerCategoryID = categoryService.addSuperCategory(newFirstLayerCategory);
                     utilities.printGreen("New Category created with ID " + newFirstLayerCategoryID);
-                    break;
                 }
-            }
         } catch (WrongCategoryEntry e) {
             utilities.printRed("Something Wrong with Category.Either wrong ID or category already exists.");
         }
     }
 
+    //OPTION #2
     public void addProduct() {
         System.out.print("Product Name: ");
         String productName = scanner.nextLine();
@@ -176,6 +169,7 @@ public class ManagerSection {
         System.out.println("New Product Created with ID: " + newProductID);
     }
 
+    //OPTION #3
     public void chargeProduct() {
         HashMap<Product, Integer> products = ps.findAllWithQuantity();
         products.forEach((product, quantity) -> utilities.printGreen(product.toString() + "\nQuantity: " + quantity,400));
@@ -198,6 +192,7 @@ public class ManagerSection {
         }
     }
 
+    //OPTION #4 - Creates a new manager
     public void signUpManager() {
         System.out.print("First Name: ");
         String firstName = scanner.nextLine();
@@ -213,10 +208,12 @@ public class ManagerSection {
         utilities.printGreen("New Manager Created with ID: " + newManagerID);
     }
 
+    //OPTION #5
     public void viewProfile() {
         utilities.printGreen(managerService.find(manager.getId()).toString());
     }
 
+    //OPTION #6
     public void changePassword() {
         System.out.print("Old Password: ");
         String oldPass = scanner.nextLine();
