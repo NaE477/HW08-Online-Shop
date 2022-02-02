@@ -5,21 +5,20 @@ import executions.Sections.CustomerSection;
 import executions.Sections.ManagerSection;
 import services.CustomerService;
 import services.ManagerService;
+import services.ShoppingCartService;
+import things.userRelated.ShoppingCart;
 import users.Customer;
 import users.Manager;
 import users.User;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Entry {
     static Connection connection = ConClass.getInstance().getConnection();
     static CustomerService customerService = new CustomerService(connection);
+    static ShoppingCartService scs = new ShoppingCartService(connection);
     static ManagerService managerService = new ManagerService(connection);
     static Scanner scanner = new Scanner(System.in);
     static Utilities utilities = new Utilities(connection);
@@ -38,7 +37,7 @@ public class Entry {
                             ManagerSection managerSection = new ManagerSection((Manager) user);
                             managerSection.entry();
                         } else if (user instanceof Customer) {
-                            CustomerSection customerSection = new CustomerSection((Customer) user, connection);
+                            CustomerSection customerSection = new CustomerSection((Customer) user);
                             customerSection.entry();
                         }
                     } else System.out.print("Wrong Username/Password. Try Again. L/S/E: ");
@@ -88,9 +87,13 @@ public class Entry {
         System.out.print("Initial Balance: ");
         Double balance = utilities.doubleReceiver();
         Customer newCustomer = new Customer(0,firstName,lastName,username,password,email,address,balance);
-        Integer newId = customerService.signUp(newCustomer);
-        if(newId != null){
-            utilities.printGreen("You've been signed up successfully with ID: " + newId);
+        Integer newCustomerId = customerService.signUp(newCustomer);
+        newCustomer.setId(newCustomerId);
+        if(newCustomerId != null){
+            utilities.printGreen("You've been signed up successfully with ID: " + newCustomerId);
+            ShoppingCart newShoppingCart = new ShoppingCart(0,newCustomer,null);
+            Integer newShoppingCartID = scs.createShoppingCart(newShoppingCart);
+            utilities.printGreen("New Shopping cart created for you with ID: " + newShoppingCartID);
         } else System.out.println("Something wrong with your sign up process.");
     }
 }

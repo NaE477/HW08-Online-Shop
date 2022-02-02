@@ -56,17 +56,11 @@ public class ShoppingCartsRepository extends Repository<ShoppingCart>{
         return null;
     }
     public ShoppingCart readByCustomer(Customer customer){
-        String readStmt = "SELECT * FROM cart_to_products " +
-                " INNER JOIN products p on p.product_id = cart_to_products.product_id " +
-                " INNER JOIN shopping_carts sc on sc.cart_id = cart_to_products.cart_id " +
-                " INNER JOIN customers c on c.customer_id = sc.customer_id " +
-                " INNER JOIN categories c2 on c2.category_id = p.cat_id " +
-                " INNER JOIN shopping_carts s on c.customer_id = s.customer_id " +
+        String readStmt = "SELECT * FROM shopping_carts " +
+                " INNER JOIN customers c on c.customer_id = shopping_carts.customer_id" +
                 " WHERE c.customer_id = ?;";
         try {
-            PreparedStatement ps = super.getConnection().prepareStatement(readStmt,
-                    ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt);
             ps.setInt( 1,customer.getId());
             return mapTo(ps.executeQuery());
         } catch (SQLException e) {
@@ -100,25 +94,11 @@ public class ShoppingCartsRepository extends Repository<ShoppingCart>{
     protected ShoppingCart mapTo(ResultSet rs) {
         Map<Product,Integer> products = new HashMap<>();
         try {
-            while (rs.next()){
-                products.put(
-                        new Product(
-                                rs.getInt(4),
-                                rs.getString(5),
-                                rs.getString("description"),
-                                rs.getDouble("price"),
-                                new Category(rs.getString("category_name")
-                                )
-                        ),
-                        rs.getInt(3)
-                );
-            }
-            rs.absolute(0);
             if(rs.next()) {
                 return new ShoppingCart(
                         rs.getInt(1),
                         new Customer(
-                                rs.getInt(11),
+                                rs.getInt(3),
                                 rs.getString("first_name"),
                                 rs.getString("last_name"),
                                 rs.getString("username"),
@@ -126,8 +106,7 @@ public class ShoppingCartsRepository extends Repository<ShoppingCart>{
                                 rs.getString("email"),
                                 rs.getString("address"),
                                 rs.getDouble("balance")
-                        ),
-                        products
+                        ),null
                 );
             }
         } catch (SQLException e) {

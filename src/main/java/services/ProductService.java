@@ -29,6 +29,9 @@ public class ProductService extends Service<Product>{
     public HashMap<Product,Integer> findAllByCategoryID(Integer categoryID){
         return pr.readAllByCategoryID(categoryID);
     }
+    public HashMap<Product,Integer> findWithQuantity(Product product){
+        return pr.readProductAndQuantity(product);
+    }
 
     public HashMap<Product,Integer> findAllWithQuantity(){
         return pr.readAllWithQuantity();
@@ -38,8 +41,8 @@ public class ProductService extends Service<Product>{
     public Integer update(Product product) {
         return pr.update(product);
     }
-    public Integer update(Product product,Integer quantity){
-        return pr.update(product,quantity);
+    public Integer changeQuantity(Product product,Integer newQuantity){
+        return pr.update(product,newQuantity);
     }
 
     @Override

@@ -132,7 +132,7 @@ public class CategoryRepository extends Repository<Category> {
                 " ORDER BY path;";
         try {
             PreparedStatement ps = super.getConnection().prepareStatement(selectStmt);
-            ps.setInt(1,1);
+            ps.setInt(1,superCategory.getId());
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
                 nodesIDs.add(rs.getInt(1));

@@ -187,7 +187,7 @@ public class ManagerSection {
             while (true) {
                 System.out.print("Quantity: ");
                 int chargeQuantity = utilities.intReceiver();
-                    Integer update = ps.update(productToCharge, oldQuantity + chargeQuantity);
+                    Integer update = ps.changeQuantity(productToCharge, oldQuantity + chargeQuantity);
                     if (update != null) {
                         utilities.printGreen("Product got charged.");
                         break;

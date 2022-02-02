@@ -48,7 +48,8 @@ public class ShoppingCartToProductRepository {
                         rs.getString("product_name"),
                         rs.getString("description"),
                         rs.getDouble("price"),
-                        new Category(rs.getInt("category_id"),rs.getString("category_name"))
+                        new Category(rs.getInt("category_id"),
+                                rs.getString("category_name"))
                 ),rs.getInt("quantity"));
             }
             return products;

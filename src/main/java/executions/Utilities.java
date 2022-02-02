@@ -5,9 +5,12 @@ import services.CategoryService;
 import services.CustomerService;
 import services.ManagerService;
 import things.shopRelated.Category;
+import things.shopRelated.Product;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -127,6 +130,14 @@ public class Utilities {
         } else {
             printYellow("This list is empty.");
         }
+    }
+
+    public static String iterateThroughProducts(Map<Product,Integer> products){
+        StringBuilder output = new StringBuilder();
+        if(products.size() > 0) {
+            products.forEach((product,quantity) -> output.append(product).append("\n Quantity: ").append(quantity));
+            return output.toString();
+        } else return ("No products been added yet.");
     }
 
     public int yearReceiver() {

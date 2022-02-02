@@ -17,6 +17,9 @@ public class ShoppingCartService extends Service<ShoppingCart> {
         sctpr = new ShoppingCartToProductRepository(super.getConnection());
     }
 
+    public Integer createShoppingCart(ShoppingCart shoppingCart){
+        return scr.insert(shoppingCart);
+    }
     @Override
     public ShoppingCart find(Integer shoppingCartId) {
         return scr.read(shoppingCartId);

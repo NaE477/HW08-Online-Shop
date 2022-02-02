@@ -124,6 +124,34 @@ public class ProductsRepository extends Repository<Product> {
         }
         return null;
     }
+    public HashMap<Product,Integer> readProductAndQuantity(Product product){
+        HashMap<Product,Integer> productAndQuantity = new HashMap<>();
+        String readStmt = "SELECT * FROM products " +
+                "               INNER JOIN categories c on c.category_id = products.cat_id" +
+                "          WHERE product_id = ?;";
+        try {
+            PreparedStatement ps = super.getConnection().prepareStatement(readStmt  );
+            ps.setInt(1,product.getId());
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                productAndQuantity.put(
+                        new Product(
+                                rs.getInt("product_id"),
+                                rs.getString("product_name"),
+                                rs.getString("description"),
+                                rs.getDouble("price"),
+                                new Category(
+                                        rs.getInt("cat_id"),
+                                        rs.getString("category_name"))
+                        ),rs.getInt("quantity")
+                );
+                return productAndQuantity;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public Integer update(Product product) {

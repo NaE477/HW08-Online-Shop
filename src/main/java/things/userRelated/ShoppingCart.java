@@ -1,5 +1,6 @@
 package things.userRelated;
 
+import executions.Utilities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,5 +16,10 @@ import java.util.Map;
 public class ShoppingCart {
     private Integer id;
     private Customer customer;
-    private Map<Product,Integer> products;
+    private Map<Product, Integer> products;
+
+    @Override
+    public String toString() {
+        return Utilities.iterateThroughProducts(products);
+    }
 }
