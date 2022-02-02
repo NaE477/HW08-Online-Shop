@@ -146,9 +146,14 @@ public class CustomerSection {
     }
     private void buyProduct(Category category) {
         List<Integer> descendantCategoriesIDs = categoryService.findAllDescendants(category);
-        HashMap<Product, Integer> products = new HashMap<>();
-        for (Integer descendantCategoriesID : descendantCategoriesIDs) {
-            products.putAll(productService.findAllByCategoryID(descendantCategoriesID));
+        HashMap<Product, Integer> products;
+        if (descendantCategoriesIDs.size() > 0) {
+            products = new HashMap<>();
+            for (Integer descendantCategoriesID : descendantCategoriesIDs) {
+                products.putAll(productService.findAllByCategoryID(descendantCategoriesID));
+            }
+        } else {
+            products = new HashMap<>(productService.findAllByCategoryID(category.getId()));
         }
         products.forEach((product, quantity) -> utilities.printGreen("\n" + product + "\n In Stock: " + quantity, 400));
 
@@ -157,32 +162,37 @@ public class CustomerSection {
             Integer productID = utilities.intReceiver();
             Product product = productService.find(productID);
             if (product != null && products.containsKey(product)) {
-                HashMap<Product, Integer> productWithQuantityInWareHouse = productService.findWithQuantity(product);
-                Integer productWarehouseQuantity = productWithQuantityInWareHouse.get(product);
-                HashMap<Product, Integer> productsInShoppingCart = shoppingCart.getProducts();
-                System.out.print("Quantity(In Stock: " + productWarehouseQuantity + "): ");
-                Integer quantity = utilities.intReceiver();
-                if (productWarehouseQuantity >= quantity) {
-                    if (quantity > 0) {
+                if (products.get(product) != 0) {
+                    HashMap<Product, Integer> productWithQuantityInWareHouse = productService.findWithQuantity(product);
+                    Integer productWarehouseQuantity = productWithQuantityInWareHouse.get(product);
+                    HashMap<Product, Integer> productsInShoppingCart = shoppingCart.getProducts();
+                    System.out.print("Quantity(In Stock: " + productWarehouseQuantity + "): ");
+                    Integer quantity = utilities.intReceiver();
+                    if (productWarehouseQuantity >= quantity) {
+                        if (quantity > 0) {
 
-                        if (shoppingCart.getProducts().containsKey(product)) {
-                            Integer oldQuantity = shoppingCart.getProducts().get(product);
-                            Integer newQuantity = oldQuantity + quantity;
-                            productsInShoppingCart.put(product, newQuantity);
-                            shoppingCart.setProducts(productsInShoppingCart);
-                            shoppingCartToProductService.changeQuantity(shoppingCart, product, newQuantity);
-                            productService.changeQuantity(product, productWarehouseQuantity - quantity);
-                            utilities.printGreen("New amount added to product in your shopping cart.");
-                        } else {
-                            productsInShoppingCart.put(product, quantity);
-                            shoppingCart.setProducts(productsInShoppingCart);
-                            shoppingCartToProductService.addProductToCart(shoppingCart, product, quantity);
-                            productService.changeQuantity(product, productWarehouseQuantity - quantity);
-                            utilities.printGreen("Product added to your shopping cart.");
-                        }
-                    } else utilities.printRed("0 quantity not permitted.");
+                            if (shoppingCart.getProducts().containsKey(product)) {
+                                Integer oldQuantity = shoppingCart.getProducts().get(product);
+                                Integer newQuantity = oldQuantity + quantity;
+                                productsInShoppingCart.put(product, newQuantity);
+                                shoppingCart.setProducts(productsInShoppingCart);
+                                shoppingCartToProductService.changeQuantity(shoppingCart, product, newQuantity);
+                                productService.changeQuantity(product, productWarehouseQuantity - quantity);
+                                utilities.printGreen("New amount added to product in your shopping cart.");
+                            } else {
+                                productsInShoppingCart.put(product, quantity);
+                                shoppingCart.setProducts(productsInShoppingCart);
+                                shoppingCartToProductService.addProductToCart(shoppingCart, product, quantity);
+                                productService.changeQuantity(product, productWarehouseQuantity - quantity);
+                                utilities.printGreen("Product added to your shopping cart.");
+                            }
+                        } else utilities.printRed("0 quantity not permitted.");
+                        break;
+                    } else utilities.printRed("Quantity more than stock.");
+                } else {
+                    utilities.printRed("No Item In Stock");
                     break;
-                } else utilities.printRed("Quantity more than stock.");
+                }
             } else utilities.printRed("Wrong ID.");
         }
     }
@@ -230,7 +240,7 @@ public class CustomerSection {
     }
 
     //OPTION #2.2 - Remove Item from Cart
-    private void removeFromCart(){
+    private void removeFromCart() {
         System.out.print("Choose Product ID you want to remove: ");
         Integer productID = utilities.intReceiver();
         Product productToRemove = productService.find(productID);
@@ -248,7 +258,7 @@ public class CustomerSection {
     }
 
     //OPTION #2.3 - Empty/Checkout Cart
-    private void checkOutCart(){
+    private void checkOutCart() {
         if (shoppingCart.getProducts().size() > 0) {
             utilities.printGreen("Your Shopping Cart Contains:");
             utilities.printGreen(Utilities.iterateThroughProducts(shoppingCart.getProducts()));
@@ -274,7 +284,7 @@ public class CustomerSection {
     }
 
     //OPTION #2.5 - Finalize Order -> checks balance and compares to receipt.
-    private void finalizeOrder(){
+    private void finalizeOrder() {
         List<Order> customersPendingOrders = orderService.findAllPendingsForCustomer(customer);
         utilities.iterateThrough(customersPendingOrders);
         label:
@@ -299,8 +309,7 @@ public class CustomerSection {
                                 break label;
                             } else utilities.printRed("Wrong Input");
                         }
-                    }
-                    else {
+                    } else {
                         utilities.printRed("Your Account balance is low. Deposit to your account or remove product to check out.");
                     }
                 } else utilities.printRed("Wrong input.");
@@ -309,10 +318,10 @@ public class CustomerSection {
     }
 
     //OPTION #2.6 - Check Order Details
-    private void checkOrderDetails(){
+    private void checkOrderDetails() {
         List<Order> orders = orderService.findAllForCustomer(customer);
         utilities.iterateThrough(orders);
-        if(orders.size() > 0){
+        if (orders.size() > 0) {
             while (true) {
                 System.out.print("Order ID: ");
                 Integer orderID = utilities.intReceiver();
@@ -327,7 +336,7 @@ public class CustomerSection {
     }
 
     //OPTION #3 - Deposit to Balance
-    private void deposit(){
+    private void deposit() {
         System.out.println("Enter Amount you want to deposit: ");
         Double depositAmount = utilities.doubleReceiver();
         customer.setBalance(customer.getBalance() + depositAmount);
@@ -336,10 +345,10 @@ public class CustomerSection {
     }
 
     //OPTION #5 - Change Address
-    private void changeAddress(){
+    private void changeAddress() {
         System.out.println("Enter C/c to change or anything else to get Back if you don't wanna change address anymore: ");
         String cOrB = scanner.nextLine();
-        if(cOrB.toUpperCase(Locale.ROOT).equals("C")){
+        if (cOrB.toUpperCase(Locale.ROOT).equals("C")) {
             System.out.println("New Address: ");
             String newAddress = scanner.nextLine();
             customer.setAddress(newAddress);
@@ -348,15 +357,15 @@ public class CustomerSection {
     }
 
     //Option #6 - Change Password
-    private void changePassword(){
+    private void changePassword() {
         System.out.println("Enter C/c to change or anything else to get Back if you don't wanna change password anymore: ");
         String cOrB = scanner.nextLine();
-        if(cOrB.toUpperCase(Locale.ROOT).equals("C")){
+        if (cOrB.toUpperCase(Locale.ROOT).equals("C")) {
             System.out.println("Old Password: ");
             String oldPass = scanner.nextLine();
             System.out.println("New Password: ");
             String newPass = scanner.nextLine();
-            if(customer.getPassword().equals(oldPass)){
+            if (customer.getPassword().equals(oldPass)) {
                 customer.setPassword(newPass);
                 customerService.update(customer);
             } else utilities.printRed("Old Password didn't match.");
@@ -369,6 +378,7 @@ public class CustomerSection {
                 totalCartPrice.updateAndGet(v -> v + product.getPrice() * quantity)));
         return totalCartPrice.get();
     }
+
     private Double orderTotalPrice(OrderDetails orderDetails) {
         AtomicReference<Double> totalOrderPrice = new AtomicReference<>(0.0);
         orderDetails.getProducts().forEach(((product, quantity) ->
